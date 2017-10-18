@@ -21,6 +21,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -1493,6 +1495,53 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     return (mPlacePage != null && mPlacePage.hideOnTouch()) ||
            (mMapFragment != null && mMapFragment.onTouch(view, event));
+  }
+
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event)
+  {
+    if ((event.getSource() & InputDevice.SOURCE_GAMEPAD)
+            == InputDevice.SOURCE_GAMEPAD) {
+      if (event.getRepeatCount() == 0) {
+        switch (keyCode) {
+          case KeyEvent.KEYCODE_BUTTON_X:
+            Statistics.INSTANCE.trackEvent(Statistics.EventName.TOOLBAR_MY_POSITION);
+            AlohaHelper.logClick(AlohaHelper.TOOLBAR_MY_POSITION);
+
+            if (!PermissionsUtils.isLocationGranted())
+            {
+              if (PermissionsUtils.isLocationExplanationNeeded(MwmActivity.this))
+                PermissionsUtils.requestLocationPermission(MwmActivity.this, LOCATION_REQUEST);
+              else
+                Toast.makeText(MwmActivity.this, R.string.enable_location_services, Toast.LENGTH_SHORT)
+                        .show();
+              return super.onKeyDown(keyCode, event);
+            }
+
+            myPositionClick();
+            return true;
+
+          case KeyEvent.KEYCODE_BUTTON_Y:
+            Statistics.INSTANCE.trackEvent(Statistics.EventName.ZOOM_IN);
+            AlohaHelper.logClick(AlohaHelper.ZOOM_IN);
+            MapFragment.nativeScalePlus();
+            return true;
+
+          case KeyEvent.KEYCODE_BUTTON_A:
+            Statistics.INSTANCE.trackEvent(Statistics.EventName.ZOOM_OUT);
+            AlohaHelper.logClick(AlohaHelper.ZOOM_OUT);
+            MapFragment.nativeScaleMinus();
+            return true;
+
+          case KeyEvent.KEYCODE_BUTTON_B:
+            //poicollector.registerMenu(this, logger.getCurrentStatistics().location);
+            return true;
+
+          default:
+        }
+      }
+    }
+    return super.onKeyDown(keyCode, event);
   }
 
   @Override

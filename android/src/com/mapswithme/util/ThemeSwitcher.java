@@ -23,7 +23,8 @@ public final class ThemeSwitcher
     {
       String theme = ThemeUtils.THEME_DEFAULT;
 
-      if (RoutingController.get().isNavigating())
+      //if (RoutingController.get().isNavigating())
+      if (true)
       {
         Location last = LocationHelper.INSTANCE.getSavedLocation();
         if (last == null)
